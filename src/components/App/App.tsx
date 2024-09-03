@@ -3,6 +3,7 @@ import CharactersContainer from '../CharactersContainer';
 import { Container } from './App.styles';
 import CharactersDataContainer from '../CharactersDataContainer';
 import LocaisContainer from '../LocaisContainer';
+import Box from '../Box';
 
 export default function App() {
   const [localSelected, setLocalSelected] = useState('Bridge');
@@ -38,12 +39,18 @@ export default function App() {
     });
   };
 
-  console.log('--->>>>', optionsSelecteds)
-
   return (
     <Container>
-      <LocaisContainer localSelected={localSelected} onChange={handleLocalChanged} />
-      <CharactersContainer checkedCharacters={checkedCharacters} onChange={handleCharacterChanged} />
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ border: '1px solid #aaa', padding: '16px', margin:'16px' }}>
+          <label style={{ paddingTop: '12px' }}>Scene File Name:</label>
+          <input type="text" style={{ width: '97%' }} />
+        </div>
+        <div style={{ display: 'flex' }}>
+          <LocaisContainer localSelected={localSelected} onChange={handleLocalChanged} />
+          <CharactersContainer checkedCharacters={checkedCharacters} onChange={handleCharacterChanged} />
+        </div>
+      </div>
       <CharactersDataContainer optionsSelecteds={optionsSelecteds} checkedCharacters={checkedCharacters} onChange={handleOptionChanged} />
     </Container>
   );

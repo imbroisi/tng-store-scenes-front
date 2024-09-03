@@ -8,4 +8,5 @@ export const Container = styled.div`
   border-radius: 4px;
   height: fit-content;
   margin: 16px;
+  max-width: 300px;
 `;

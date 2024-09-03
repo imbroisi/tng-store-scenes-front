@@ -46,7 +46,11 @@ export const CHARACTERS_ACTIONS = {
     'normal',
     'quietly',
     'loudly',
-    'shouting'
+    'shouting',
+    'laughing',
+    'crying',
+    'singing',
+    'swearing',
   ],
   WALKING: [
     'normal',
@@ -54,10 +58,11 @@ export const CHARACTERS_ACTIONS = {
     'slow',
     'running'
   ],
-  XXX: [
-    'normal',
-    'fast',
-    'slow',
-    'running'
+  FIGHTING: [
+    'fists',
+    'phasers',
+    'photonTorpedos',
+    'disruptors',
+    'sword',
   ],
 };
