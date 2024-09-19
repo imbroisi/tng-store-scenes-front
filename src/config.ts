@@ -43,6 +43,7 @@ export const CHARACTERS = [
 
 export const CHARACTERS_ACTIONS = {
   TALKING: [
+    'none',
     'normal',
     'quietly',
     'loudly',
@@ -53,12 +54,14 @@ export const CHARACTERS_ACTIONS = {
     'swearing',
   ],
   WALKING: [
+    'none',
     'normal',
     'fast',
     'slow',
     'running'
   ],
   FIGHTING: [
+    'none',
     'fists',
     'phasers',
     'photonTorpedos',
@@ -66,3 +69,28 @@ export const CHARACTERS_ACTIONS = {
     'sword',
   ],
 };
+
+/*
+  Por exemplo Bridge.js
+  {
+    's04e12 00:01:00': {
+      Picard: {
+        TALKING: ['normal', 'quietly', 'loudly']
+        FIGHTING: ['fists', 'phasers', 'photonTorpedos']
+      },
+      Data: {
+        TALKING: ['normal', 'quietly']
+        WALKING: ['normal', 'fast', 'slow']
+      }
+    },
+    ...  
+}  
+
+
+*/
+
+/*
+  pesquisa por nome do personagem:
+    * -> qualquer um
+ 
+*/

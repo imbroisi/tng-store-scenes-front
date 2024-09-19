@@ -11,41 +11,117 @@ export default function App() {
   const [localSelected, setLocalSelected] = useState('Bridge');
   const [checkedCharacters, setCheckedCharacters] = useState<{ [key: string]: boolean }>({});
   const [optionsSelecteds, setOptionsSelecteds] = useState<{ [key: string]: any }>({});
-  
+
+  const validateEpisodeTime = (time: string): boolean => {
+    const regex = /^s\d{2}e\d{2}$/;
+    return regex.test(time);
+  };
+
+  const validateTimeFormat = (time: string): boolean => {
+    const regex = /^([0-1]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
+    return regex.test(time);
+  };
+
   const handleSave = async () => {
+    if (!validateEpisodeTime(episode)) {
+      alert('INVALID EPISODE FORMAT.\nIt should be in the format for example s05e12.');
+      return
+    }
+
+    if (!validateTimeFormat(time)) {
+      alert('INVALID TIME FORMAT.\nRules:\n\t It should be in the format hh:mm:ss.\n\t The max values is 23:59:59');
+      return;
+    }
+
+
     // eslint-disable-next-line no-restricted-globals
-    if (!confirm('Save scene?')){
+    if (!confirm('Save scene?')) {
       console.log('==> not saved');
       return;
     }
+    // const scene = {
+    //   episode_time: `${episode} ${time} OK`,
+    //   local: localSelected,
+    //   characters: Object.keys(checkedCharacters).map(character => {
+    //     return {
+    //       name: character,
+    //       actions: Object.keys(optionsSelecteds[character]).map(optionName => {
+    //         return {
+    //           name: optionName,
+    //           values: Object.keys(optionsSelecteds[character][optionName]).filter(key => optionsSelecteds[character][optionName][key])
+    //         }
+    //       })
+    //     }
+    //   })
+    // };
+
+    // const characters: never[] = [];
+
+    // Object.keys(checkedCharacters).forEach(character => {
+
+    //   characters[character] = {}
+
+    //   Object.keys(optionsSelecteds[character]).forEach(optionName => {
+    //     characters[character][optionName] = Object.keys(optionsSelecteds[character][optionName]).filter(key => optionsSelecteds[character][optionName][key]) 
+    //   })
+    // })
+
+    // console.log('==> checkedCharacters', checkedCharacters);
+
+    
+
+    const characters: { name: string; actions: { name: string; value: string; }[]; }[] = [];
+    
+    Object.keys(checkedCharacters).forEach(character => {
+      // console.log('==> character', character);
+      // console.log('==> checkedCharacters[character]', checkedCharacters[character]);
+      // console.log('==> optionsSelecteds[character]', optionsSelecteds[character]);
+      if (!checkedCharacters[character]) {
+        return;
+      }
+
+      characters.push({
+        name: character,
+        actions: Object.keys(optionsSelecteds[character]).map(optionName => {
+          return {
+            name: optionName,
+            value: optionsSelecteds[character][optionName],
+          }
+        })
+      });
+    });
+
+    // console.log('==> optionsSelecteds', optionsSelecteds);
+
     const scene = {
-      episode_time: `${episode} ${time} OK`,
+      name: `${episode} ${time}`,
       local: localSelected,
-      characters: Object.keys(checkedCharacters).map(character => {
-        return {
-          name: character,
-          actions: Object.keys(optionsSelecteds[character]).map(optionName => {
-            return {
-              name: optionName,
-              values: Object.keys(optionsSelecteds[character][optionName]).filter(key => optionsSelecteds[character][optionName][key])
-            }
-          })
-        }
-      })
-    };
+      characters
+      // characters: Object.keys(checkedCharacters).map(character => {
+      //   return {
+      //     [character]: {
+      //       actions: Object.keys(optionsSelecteds[character]).map(optionName => {
+      //         return {
+      //           name: optionName,
+      //           values: Object.keys(optionsSelecteds[character][optionName]).filter(key => optionsSelecteds[character][optionName][key])
+      //         }
+      //       })
+      //     }
+      //   }
+      // })
+    }
 
     console.log('==> scene', scene);
 
+    // const response = await fetch('http://localhost:3001/add-scene', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   body: JSON.stringify(scene)
+    // });
 
-    const response = await fetch('http://localhost:3001/save-scene', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(scene)
-    });
-
-    console.log('==> response', response);
+    // console.log('==> response', response);
   }
 
   const handleLocalChanged = (local: string) => {
@@ -69,10 +145,11 @@ export default function App() {
       ...optionsSelecteds,
       [character]: {
         ...optionsSelecteds[character],
-        [optionName]: {
-          ...optionsSelecteds[character]?.[optionName],
-          [optionChanged]: isChecked
-        }
+        [optionName]: optionChanged
+        // {
+        //   // ...optionsSelecteds[character]?.[optionName],
+        //   [optionChanged]: isChecked
+        // }
       }
     });
   };
@@ -82,12 +159,32 @@ export default function App() {
   }
 
   const handleTimeChange = (e: any) => {
-    console.log('==> time', e.target.value);
-    setTime(e.target.value);
+    const newTime = e.target.value;
+    setTime(newTime);
   }
 
-  const handleTmpPost = async () => {
-    const response = await fetch(`http://localhost:3001/search-scenes?local=Bridge&char=Data&action=TALKING&values=normal`, {
+  const handleTmpRead = async () => {
+    const characters = JSON.stringify({
+      "Picard": {
+        "WALKING": [
+          "normal",
+        ],
+        "TALKING": [
+          "swearing",
+          "shouting"
+        ]
+      },
+      "Data": {
+        "FIGHTING": [
+          "photonTorpedos",
+          "disruptors"
+        ]
+      }
+    });
+
+    // // const chars = JSON.stringify(['Picard']);
+
+    const response = await fetch(`http://localhost:3001/search-scenes?local=Bridge&characters=${encodeURIComponent(characters)}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -95,8 +192,11 @@ export default function App() {
     });
 
     const data = await response.json();
-    console.log('==> fetched scenes', data);
+    // console.log('==> fetched scenes', data);
   }
+
+  // console.log('(2) ==> optionsSelecteds', optionsSelecteds);
+
 
   return (
     <Container>
@@ -119,7 +219,7 @@ export default function App() {
               Save
             </button>
 
-            <button style={{ marginTop: '16px' }} onClick={handleTmpPost}>
+            <button style={{ marginTop: '16px' }} onClick={handleTmpRead}>
               TMP Get
             </button>
           </div>
