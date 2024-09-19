@@ -70,7 +70,7 @@ export default function App() {
 
     
 
-    const characters: { name: string; actions: { name: string; value: string; }[]; }[] = [];
+    const characters: { name: string; actions: string; }[] = [];
     
     Object.keys(checkedCharacters).forEach(character => {
       // console.log('==> character', character);
@@ -80,14 +80,18 @@ export default function App() {
         return;
       }
 
+      const actionsString = JSON.stringify(optionsSelecteds[character]);
+
       characters.push({
         name: character,
-        actions: Object.keys(optionsSelecteds[character]).map(optionName => {
-          return {
-            name: optionName,
-            value: optionsSelecteds[character][optionName],
-          }
-        })
+        actions: actionsString
+        
+        // actions: Object.keys(optionsSelecteds[character]).map(optionName => {
+        //   return {
+        //     name: optionName,
+        //     value: optionsSelecteds[character][optionName],
+        //   }
+        // })
       });
     });
 
@@ -111,17 +115,17 @@ export default function App() {
       // })
     }
 
-    console.log('==> scene', scene);
+    console.log('==> scene', JSON.stringify(scene, null, 2));
 
-    // const response = await fetch('http://localhost:3001/add-scene', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   },
-    //   body: JSON.stringify(scene)
-    // });
+    const response = await fetch('http://localhost:3001/add-scene', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(scene)
+    });
 
-    // console.log('==> response', response);
+    console.log('==> response', response);
   }
 
   const handleLocalChanged = (local: string) => {
