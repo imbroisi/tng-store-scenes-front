@@ -119,6 +119,11 @@ export default function App() {
     });
 
     console.log('==> response', response);
+    if (response.status !== 200) {
+      const body = await response.json();
+      console.log('==> body', body);
+      alert('Error saving scene: ' + body.error);
+    }
   }
 
   const handleLocalChanged = (local: string) => {
