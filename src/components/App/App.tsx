@@ -4,6 +4,7 @@ import { Container } from './App.styles';
 import CharactersDataContainer from '../CharactersDataContainer';
 import LocaisContainer from '../LocaisContainer';
 import { CHARACTERS_ACTIONS } from '../../config';
+import ResultSearch from '../ResultSearch';
 // import Box from '../Box';
 
 const ACTIONS_KEYS = Object.keys(CHARACTERS_ACTIONS);
@@ -16,30 +17,29 @@ export default function App() {
   const [checkedCharacters, setCheckedCharacters] = useState<{ [key: string]: boolean }>({});
   const [optionsSelecteds, setOptionsSelecteds] = useState<{ [key: string]: any }>({});
   const [mode, setMode] = useState('FLEX');
+  const [scenesFound, setScenesFound] = useState<string[] | null>(null);
 
   const formatCharacters = () => {
     const characters: { name: string; actions: string; }[] = [];
 
     Object.keys(checkedCharacters).forEach(character => {
-      // console.log('==> character', character);
-      // console.log('==> checkedCharacters[character]', checkedCharacters[character]);
-      // console.log('==> optionsSelecteds[character]', optionsSelecteds[character]);
       if (!checkedCharacters[character]) {
         return;
       }
 
-      const actionsString = JSON.stringify(optionsSelecteds[character]);
+      const actionsFormated: { [key: string]: string } = {};
+      ACTIONS_KEYS.forEach(action => {
+        if (optionsSelecteds[character][action] === 'ignore') {
+          return;
+        }
+
+        actionsFormated[action] = optionsSelecteds[character][action];
+      });
+      const actionsString = JSON.stringify(actionsFormated);
 
       characters.push({
         name: character,
         actions: actionsString
-
-        // actions: Object.keys(optionsSelecteds[character]).map(optionName => {
-        //   return {
-        //     name: optionName,
-        //     value: optionsSelecteds[character][optionName],
-        //   }
-        // })
       });
     });
 
@@ -47,6 +47,8 @@ export default function App() {
   }
 
   const handleGet = async () => {
+    setScenesFound(null);
+
     const characters = formatCharacters();
 
     const search = {
@@ -65,10 +67,13 @@ export default function App() {
 
     const { scenes } = await response.json();
 
+    setScenesFound(scenes);
+
     console.log('==> fetched scenes', scenes);
   }
 
   const handleSave = async () => {
+    console.log('==> saving scene');
     const validateTimeFormat = (time: string): boolean => {
       const regex = /^([0-1]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
       return regex.test(time);
@@ -133,7 +138,7 @@ export default function App() {
     optionChanged: string,
   ) => {
     let newOptionsSelecteds: { [action: string]: string; };
-      
+
     if (optionName === 'ALL') {
       newOptionsSelecteds = {};
       ACTIONS_KEYS.forEach(action => {
@@ -141,8 +146,8 @@ export default function App() {
       });
     } else {
       newOptionsSelecteds = { [optionName]: optionChanged };
-    } 
-    
+    }
+
     setOptionsSelecteds({
       ...optionsSelecteds,
       [character]: {
@@ -165,7 +170,7 @@ export default function App() {
 
   return (
     <>
-      <h1 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', borderBottom: '1px solid #ddd', padding: '0px', margin: 0, height: '100px' }}>
+      <h1 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', borderBottom: '1px solid #ddd', padding: '0px', margin: 0, height: '60px' }}>
         <div style={{
           display: 'flex',
           justifyContent: 'center',
@@ -178,7 +183,7 @@ export default function App() {
         </div>
         <div style={{ position: 'absolute', right: '24px', fontSize: '14px', cursor: 'pointer', color: 'blue' }}>
           <div onClick={() => setPageModel(pageModel === 'get' ? 'save' : 'get')}>
-            {pageModel === 'get' ? 'set scenes >' : 'save scenes >'}
+            {pageModel === 'get' ? 'save scenes >' : 'get scenes >'}
           </div>
         </div>
       </h1>
@@ -236,50 +241,8 @@ export default function App() {
         </div>
         <CharactersDataContainer optionsSelecteds={optionsSelecteds} checkedCharacters={checkedCharacters} onChange={handleOptionChanged} />
       </Container>
+
+      <ResultSearch scenesFound={scenesFound} />
     </>
   );
 }
-
-/*
-
-I have example they are in json, but must be saved in SQLite to be searchable. 
-
-
-{e to save the following informations in SQLite.
-In th
-  episode_time: 's04e12 00:01:00',
-  local: 'Corridor',
-  characters: [
-    {
-      name: 'Picard',
-      actions: [
-      {
-        name: 'TALKING',
-        values: ['normal', 'quietly', 'loudly']
-      },
-      {
-        name: 'FIGHTING',
-        values: ['fists', 'phasers', 'photonTorpedos']
-      }
-    },
-    {
-      name: 'Data',
-      actions: [
-      {
-        name: 'TALKING',
-        values: ['normal', 'quietly']
-      },
-      {
-        name: 'WALKING',
-        values: ['normal', 'fast', 'slow']
-      }
-    },
-  ]
-}
-
-So to bem possible to search for a scene in the "Corridor", with character "Picard", action "TALKING" with values ["loudly", "normal"].
-
-the return must be the episode_time.
-
-
-*/

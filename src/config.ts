@@ -8,16 +8,20 @@ export const LOCAIS = [
   'Corridor',
   'Elevator',
   'Sickbay',
-  'Holodeck',
+  'HolodeckEntrance',
   'TransporterRoom',
   'ShuttleBay',
   'ShuttleCraft',
   'ObservationLounge',
   'CaptainsQuarters',
   'CargoBay',
-  'Space',
-  'Planet',
   'JeffriesTube',
+  'InsideKlingonShip',
+  'InsideBorgShip',
+  'InsideRomulanShip',
+  'InsideFederationShip',
+  'Space',
+  'PlanetSurface',
 ];
 
 export const CHARACTERS = [
@@ -27,14 +31,15 @@ export const CHARACTERS = [
   'Geordi',
   'Worf',
   'Troi',
-  'Crusher',
+  'DraCrusher',
+  'Wesley',
   'Q',
   'Guinan',
   'Almirante',
   'Klingon',
   'Borg',
   'Romulan',
-  'Native',
+  'PlanetNative',
   'KlingonShip',
   'BorgShip',
   'RomulanShip',  
@@ -43,7 +48,8 @@ export const CHARACTERS = [
 
 export const CHARACTERS_ACTIONS = {
   TALKING: [
-    'none',
+    'ignore',
+    'silence',
     'normal',
     'quietly',
     'loudly',
@@ -54,14 +60,14 @@ export const CHARACTERS_ACTIONS = {
     'swearing',
   ],
   WALKING: [
-    'none',
+    'ignore',
     'normal',
     'fast',
     'slow',
     'running'
   ],
   FIGHTING: [
-    'none',
+    'ignore',
     'fists',
     'phasers',
     'photonTorpedos',
