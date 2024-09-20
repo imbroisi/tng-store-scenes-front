@@ -3,75 +3,23 @@ import CharactersContainer from '../CharactersContainer';
 import { Container } from './App.styles';
 import CharactersDataContainer from '../CharactersDataContainer';
 import LocaisContainer from '../LocaisContainer';
+import { CHARACTERS_ACTIONS } from '../../config';
 // import Box from '../Box';
 
+const ACTIONS_KEYS = Object.keys(CHARACTERS_ACTIONS);
+
 export default function App() {
+  const [pageModel, setPageModel] = useState('get');
   const [episode, setEpisode] = useState('');
   const [time, setTime] = useState('');
   const [localSelected, setLocalSelected] = useState('Bridge');
   const [checkedCharacters, setCheckedCharacters] = useState<{ [key: string]: boolean }>({});
   const [optionsSelecteds, setOptionsSelecteds] = useState<{ [key: string]: any }>({});
+  const [mode, setMode] = useState('FLEX');
 
-  const validateEpisodeTime = (time: string): boolean => {
-    const regex = /^s\d{2}e\d{2}$/;
-    return regex.test(time);
-  };
-
-  const validateTimeFormat = (time: string): boolean => {
-    const regex = /^([0-1]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
-    return regex.test(time);
-  };
-
-  const handleSave = async () => {
-    if (!validateEpisodeTime(episode)) {
-      alert('INVALID EPISODE FORMAT.\nIt should be in the format for example s05e12.');
-      return
-    }
-
-    if (!validateTimeFormat(time)) {
-      alert('INVALID TIME FORMAT.\nRules:\n\t It should be in the format hh:mm:ss.\n\t The max values is 23:59:59');
-      return;
-    }
-
-
-    // eslint-disable-next-line no-restricted-globals
-    if (!confirm('Save scene?')) {
-      console.log('==> not saved');
-      return;
-    }
-    // const scene = {
-    //   episode_time: `${episode} ${time} OK`,
-    //   local: localSelected,
-    //   characters: Object.keys(checkedCharacters).map(character => {
-    //     return {
-    //       name: character,
-    //       actions: Object.keys(optionsSelecteds[character]).map(optionName => {
-    //         return {
-    //           name: optionName,
-    //           values: Object.keys(optionsSelecteds[character][optionName]).filter(key => optionsSelecteds[character][optionName][key])
-    //         }
-    //       })
-    //     }
-    //   })
-    // };
-
-    // const characters: never[] = [];
-
-    // Object.keys(checkedCharacters).forEach(character => {
-
-    //   characters[character] = {}
-
-    //   Object.keys(optionsSelecteds[character]).forEach(optionName => {
-    //     characters[character][optionName] = Object.keys(optionsSelecteds[character][optionName]).filter(key => optionsSelecteds[character][optionName][key]) 
-    //   })
-    // })
-
-    // console.log('==> checkedCharacters', checkedCharacters);
-
-    
-
+  const formatCharacters = () => {
     const characters: { name: string; actions: string; }[] = [];
-    
+
     Object.keys(checkedCharacters).forEach(character => {
       // console.log('==> character', character);
       // console.log('==> checkedCharacters[character]', checkedCharacters[character]);
@@ -85,7 +33,7 @@ export default function App() {
       characters.push({
         name: character,
         actions: actionsString
-        
+
         // actions: Object.keys(optionsSelecteds[character]).map(optionName => {
         //   return {
         //     name: optionName,
@@ -95,24 +43,64 @@ export default function App() {
       });
     });
 
-    // console.log('==> optionsSelecteds', optionsSelecteds);
+    return characters;
+  }
+
+  const handleGet = async () => {
+    const characters = formatCharacters();
+
+    const search = {
+      mode,
+      local: localSelected,
+      characters
+    }
+
+    const response = await fetch('http://localhost:3001/search-scenes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(search)
+    });
+
+    const { scenes } = await response.json();
+
+    console.log('==> fetched scenes', scenes);
+  }
+
+  const handleSave = async () => {
+    const validateTimeFormat = (time: string): boolean => {
+      const regex = /^([0-1]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
+      return regex.test(time);
+    };
+
+    const validateEpisodeTime = (time: string): boolean => {
+      const regex = /^s\d{2}e\d{2}$/;
+      return regex.test(time);
+    };
+
+    if (!validateEpisodeTime(episode)) {
+      alert('INVALID EPISODE FORMAT.\nIt should be in the format for example s05e12.');
+      return
+    }
+
+    if (!validateTimeFormat(time)) {
+      alert('INVALID TIME FORMAT.\nRules:\n\t It should be in the format hh:mm:ss.\n\t The max values is 23:59:59');
+      return;
+    }
+
+    // eslint-disable-next-line no-restricted-globals
+    if (!confirm('Save scene?')) {
+      console.log('==> not saved');
+      return;
+    }
+
+    const characters = formatCharacters();
 
     const scene = {
       name: `${episode} ${time}`,
       local: localSelected,
       characters
-      // characters: Object.keys(checkedCharacters).map(character => {
-      //   return {
-      //     [character]: {
-      //       actions: Object.keys(optionsSelecteds[character]).map(optionName => {
-      //         return {
-      //           name: optionName,
-      //           values: Object.keys(optionsSelecteds[character][optionName]).filter(key => optionsSelecteds[character][optionName][key])
-      //         }
-      //       })
-      //     }
-      //   }
-      // })
     }
 
     console.log('==> scene', JSON.stringify(scene, null, 2));
@@ -143,17 +131,23 @@ export default function App() {
     character: string,
     optionName: string,
     optionChanged: string,
-    isChecked: boolean
   ) => {
+    let newOptionsSelecteds: { [action: string]: string; };
+      
+    if (optionName === 'ALL') {
+      newOptionsSelecteds = {};
+      ACTIONS_KEYS.forEach(action => {
+        newOptionsSelecteds[action] = optionChanged;
+      });
+    } else {
+      newOptionsSelecteds = { [optionName]: optionChanged };
+    } 
+    
     setOptionsSelecteds({
       ...optionsSelecteds,
       [character]: {
         ...optionsSelecteds[character],
-        [optionName]: optionChanged
-        // {
-        //   // ...optionsSelecteds[character]?.[optionName],
-        //   [optionChanged]: isChecked
-        // }
+        ...newOptionsSelecteds
       }
     });
   };
@@ -167,74 +161,82 @@ export default function App() {
     setTime(newTime);
   }
 
-  const handleTmpRead = async () => {
-    const characters = JSON.stringify({
-      "Picard": {
-        "WALKING": [
-          "normal",
-        ],
-        "TALKING": [
-          "swearing",
-          "shouting"
-        ]
-      },
-      "Data": {
-        "FIGHTING": [
-          "photonTorpedos",
-          "disruptors"
-        ]
-      }
-    });
-
-    // // const chars = JSON.stringify(['Picard']);
-
-    const response = await fetch(`http://localhost:3001/search-scenes?local=Bridge&characters=${encodeURIComponent(characters)}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-
-    const data = await response.json();
-    // console.log('==> fetched scenes', data);
-  }
-
-  // console.log('(2) ==> optionsSelecteds', optionsSelecteds);
-
+  const noCharSelected = Object.keys(checkedCharacters).filter(character => checkedCharacters[character]).length === 0;
 
   return (
-    <Container>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <div style={{ border: '1px solid #aaa', padding: '16px', margin: '16px' }}>
-          <div>
-            <label>
-              Episode:
-            </label>
-            <input type="text" value={episode} style={{ width: '97%' }} onChange={handleEpisodeChange} />
+    <>
+      <h1 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', borderBottom: '1px solid #ddd', padding: '0px', margin: 0, height: '100px' }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: pageModel === 'get' ? 'transparent' : '#ffaaaa',
+          width: '100%',
+          height: '100%'
+        }}>
+          {pageModel === 'get' ? 'Get Scenes' : 'Save Scenes'}
+        </div>
+        <div style={{ position: 'absolute', right: '24px', fontSize: '14px', cursor: 'pointer', color: 'blue' }}>
+          <div onClick={() => setPageModel(pageModel === 'get' ? 'save' : 'get')}>
+            {pageModel === 'get' ? 'set scenes >' : 'save scenes >'}
           </div>
-          <div style={{ marginTop: '8px' }}>
-            <label>
-              Time:
-            </label>
-            <input type="text" value={time} style={{ width: '97%' }} onChange={handleTimeChange} />
-          </div>
-          <div>
-            <button style={{ marginTop: '16px' }} onClick={handleSave}>
-              Save
-            </button>
+        </div>
+      </h1>
 
-            <button style={{ marginTop: '16px' }} onClick={handleTmpRead}>
-              TMP Get
-            </button>
+      <Container>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ border: '1px solid #aaa', padding: '16px', margin: '16px' }}>
+            {pageModel === 'get' ? (
+              <div>
+                <div style={{ display: 'flex', width: '100%', justifyContent: 'center', marginTop: '6px' }}>
+                  <label>
+                    Search mode
+                    <select
+                      disabled={noCharSelected} style={{ marginTop: '6px', fontSize: '14px', padding: '4px 8px' }}
+                      value={mode}
+                      onChange={(e) => setMode(e.target.value)}
+                    >
+                      <option value="STRICT"> Exact Match </option>
+                      <option value="FLEX"> Exact Match accepting other characters in scene </option>
+                    </select>
+                  </label>
+                </div>
+                <div style={{ display: 'flex', width: '100%', justifyContent: 'center', marginTop: '20px' }}>
+                  <button onClick={handleGet} disabled={noCharSelected}>
+                    Get Scenes
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <label>
+                    Episode:
+                  </label>
+                  <input type="text" value={episode} style={{ width: '97%' }} onChange={handleEpisodeChange} />
+                </div>
+                <div style={{ marginTop: '8px' }}>
+                  <label>
+                    Time:
+                  </label>
+                  <input type="text" value={time} style={{ width: '97%' }} onChange={handleTimeChange} />
+                </div>
+                <div>
+                  <button style={{ marginTop: '16px' }} onClick={handleSave}>
+                    Save
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+          <div style={{ display: 'flex' }}>
+            <LocaisContainer localSelected={localSelected} onChange={handleLocalChanged} />
+            <CharactersContainer checkedCharacters={checkedCharacters} onChange={handleCharacterChanged} />
           </div>
         </div>
-        <div style={{ display: 'flex' }}>
-          <LocaisContainer localSelected={localSelected} onChange={handleLocalChanged} />
-          <CharactersContainer checkedCharacters={checkedCharacters} onChange={handleCharacterChanged} />
-        </div>
-      </div>
-      <CharactersDataContainer optionsSelecteds={optionsSelecteds} checkedCharacters={checkedCharacters} onChange={handleOptionChanged} />
-    </Container>
+        <CharactersDataContainer optionsSelecteds={optionsSelecteds} checkedCharacters={checkedCharacters} onChange={handleOptionChanged} />
+      </Container>
+    </>
   );
 }
 
