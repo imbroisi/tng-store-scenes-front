@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TNG Player</title>
+  <link href="https://vjs.zencdn.net/7.19.2/video-js.css" rel="stylesheet" />
+
+  <script src="https://vjs.zencdn.net/8.17.4/video.min.js"></script>
+  <style>
+    /* Set the body and html to take full height */
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      border-color: white;
+      box-sizing: border-box;
+    }
+
+    /* Container for the video */
+    .video-container {
+      /* position: relative; */
+      width: 100%;
+      height: 100%;
+      /* background-color: white; */
+      /* padding: 20px; */
+      box-sizing: border-box;
+      color: white;
+      background-color: black;
+      padding: 2px;
+    ;
+      /* Make the container fill the available space */
+    }
+
+    /* Video.js player settings */
+    .video-js {
+      width: 100%;
+      /* Make the player fill the width of the container */
+      height: 100%;
+      /* Make the player fill the height of the container */
+      box-sizing: border-box;
+      border: 1px solid #888;
+
+    }
+  </style>
+</head>
+
+<body>
+<div class="video-container">
+  <video id="my-video" class="video-js" controls preload="auto">
+    <source id="my-src" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</div>
+
+
+  <script>
+    function pauseVideo() {
+      console.log('pauseVideo');
+      const video = videojs('my-video');
+      video.pause();
+    }
+
+    var params = new URLSearchParams(document.location.search);
+    var startTime = params.get('starttime') || '';
+    console.log('starttime', startTime);
+    const [hours, minutes, seconds] = startTime.split(':');
+
+    startTimeSecs = parseInt(startTime) * 60 * 60 + parseInt(minutes) * 60 + parseInt(seconds);
+
+    const getVideoTitle = async () => {
+      const response = await fetch(`//localhost:3001/videos-title/${params.get('src')}`);
+      const title = await response.text();
+      // document.getElementById('video-title').innerText = title;
+
+      const parentTitleObj = parent.document?.getElementById('video-title')
+      if (parentTitleObj) {
+        parentTitleObj.innerText = title;
+      }
+      // parent.document.getElementById('video-title').innerText = title;
+    }
+
+    var videoTitleUrl = `//localhost:3001/videos-title/${params.get('src')}`;
+
+    var videoUrl = `//localhost:3001/videos/${params.get('src')}`;
+
+    document.getElementById('my-src').src = videoUrl;
+    var player = videojs('my-video');
+
+    // Set the starting point to 10 minutes (600 seconds)
+    player.ready(function () {
+      document.body.style.display = 'block';
+      if (startTimeSecs) {
+        player.currentTime(startTimeSecs);
+      }
+      // player.currentTime(startTimeSecs);
+      // player.play(); // Ensure playback starts
+
+      getVideoTitle();
+
+    });
+  </script>
+
+</body>
+
+</html>

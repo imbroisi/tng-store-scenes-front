@@ -28,7 +28,7 @@ export default function CharacterInfos({ character, optionsSelecteds, onChange }
 
           return (
             <div key={action} id={action} style={{ marginBottom: '16px' }}>
-              <div>
+              <div style={{ marginBottom: '8px', borderBottom: '1px solid #ddd', paddingBottom: '4px' }}>
                 <b>{action.toLowerCase()}</b>
               </div>
               {                 

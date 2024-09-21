@@ -1,8 +1,10 @@
 export const LOCAIS = [
   'Bridge',
   'ScreenBridge',
+  'BackPanelBridge',
   'ReadyRoom',
   'ConferenceRoom',
+  'NotListedRoom',
   'Engineering',
   'TenForward',
   'Corridor',
@@ -16,6 +18,7 @@ export const LOCAIS = [
   'CaptainsQuarters',
   'CargoBay',
   'JeffriesTube',
+
   'InsideKlingonShip',
   'InsideBorgShip',
   'InsideRomulanShip',
@@ -39,15 +42,23 @@ export const CHARACTERS = [
   'Klingon',
   'Borg',
   'Romulan',
-  'PlanetNative',
+
+  'EnterpriseFront',
+  'EnterpriseBack',
+  'EnterpriseSide',
+  
   'KlingonShip',
   'BorgShip',
   'RomulanShip',  
   'FederationShip',
+
+  'PlanetGround',
+  'PlanetOrbit',
+  'SpaceStation',
 ];
 
 export const CHARACTERS_ACTIONS = {
-  TALKING: [
+  'TALKING/SOUND': [
     'ignore',
     'silence',
     'normal',
@@ -59,12 +70,15 @@ export const CHARACTERS_ACTIONS = {
     'singing',
     'swearing',
   ],
-  WALKING: [
+  MOVEMENT: [
     'ignore',
+    'stopped',
     'normal',
-    'fast',
     'slow',
-    'running'
+    'fast',
+    'running',
+    'warp',
+    'dancing'
   ],
   FIGHTING: [
     'ignore',
@@ -73,6 +87,7 @@ export const CHARACTERS_ACTIONS = {
     'photonTorpedos',
     'disruptors',
     'sword',
+    'bat\'leth'
   ],
 };
 
@@ -81,12 +96,12 @@ export const CHARACTERS_ACTIONS = {
   {
     's04e12 00:01:00': {
       Picard: {
-        TALKING: ['normal', 'quietly', 'loudly']
+        TALKING/SOUND: ['normal', 'quietly', 'loudly']
         FIGHTING: ['fists', 'phasers', 'photonTorpedos']
       },
       Data: {
-        TALKING: ['normal', 'quietly']
-        WALKING: ['normal', 'fast', 'slow']
+        TALKING/SOUND: ['normal', 'quietly']
+        MOVEMENT: ['normal', 'fast', 'slow']
       }
     },
     ...  

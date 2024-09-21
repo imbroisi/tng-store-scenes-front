@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import CharactersContainer from '../CharactersContainer';
 import { Container } from './App.styles';
 import CharactersDataContainer from '../CharactersDataContainer';
 import LocaisContainer from '../LocaisContainer';
 import { CHARACTERS_ACTIONS } from '../../config';
 import ResultSearch from '../ResultSearch';
-// import Box from '../Box';
+// import VideoJS from '../VideoJS';
+// import videojs from 'video.js';
 
 const ACTIONS_KEYS = Object.keys(CHARACTERS_ACTIONS);
 
@@ -18,6 +19,8 @@ export default function App() {
   const [optionsSelecteds, setOptionsSelecteds] = useState<{ [key: string]: any }>({});
   const [mode, setMode] = useState('FLEX');
   const [scenesFound, setScenesFound] = useState<string[] | null>(null);
+  const divIframeRef = useRef<HTMLDivElement | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   const formatCharacters = () => {
     const characters: { name: string; actions: string; }[] = [];
@@ -173,8 +176,64 @@ export default function App() {
 
   const noCharSelected = Object.keys(checkedCharacters).filter(character => checkedCharacters[character]).length === 0;
 
+  // TMP
+  const videoSrc = 's05e13';
+  const startTime = '00:22:13';
+
   return (
     <>
+      <div
+        ref={divIframeRef}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          border: '2px solid #444',
+          borderRadius: '4px',
+          position: 'fixed',
+          zIndex: 1000,
+          top: '20px',
+          left: '20px',
+          backgroundColor: '#000',
+          padding: '8px',
+          color: '#fff',
+        }}
+      >
+        <div>
+          <iframe
+            ref={iframeRef}
+            src={`/video-player.html?src=${videoSrc}&starttime=${startTime}`}
+            width="960"
+            height="720"
+            style={{ marginBottom: '8px', border: 0 }}
+          />
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            width: '100%',
+            padding: '0 8px',
+            boxSizing: 'border-box',
+          }}
+        >
+          <div id="video-title" />
+
+          <div style={{ fontSize: '14px' }}>start &#8594; {startTime}</div>
+
+          <button onClick={() => {
+            if (divIframeRef.current) {
+              console.log('==> closing iframe');
+              // @ts-ignore
+              iframeRef.current.contentWindow?.pauseVideo();
+              divIframeRef.current.style.display = 'none';
+            }
+          }}>
+            Close
+          </button>
+        </div>
+      </div>
+
       <h1 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', borderBottom: '1px solid #ddd', padding: '0px', margin: 0, height: '60px' }}>
         <div style={{
           display: 'flex',
@@ -192,6 +251,8 @@ export default function App() {
           </div>
         </div>
       </h1>
+
+      {/* <VideoJS options={videoJsOptions} onReady={handlePlayerReady} /> */}
 
       <Container>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
