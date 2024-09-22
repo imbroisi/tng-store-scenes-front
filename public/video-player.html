@@ -29,7 +29,7 @@
       color: white;
       background-color: black;
       padding: 2px;
-    ;
+      ;
       /* Make the container fill the available space */
     }
 
@@ -47,15 +47,16 @@
 </head>
 
 <body>
-<div class="video-container">
-  <video id="my-video" class="video-js" controls preload="auto">
-    <source id="my-src" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-</div>
+  <div class="video-container">
+    <video id="my-video" class="video-js" controls preload="auto">
+      <source id="my-src" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
 
 
   <script>
+    console.log('++++>>> video-player.html');
     function pauseVideo() {
       console.log('pauseVideo');
       const video = videojs('my-video');
@@ -81,25 +82,29 @@
       // parent.document.getElementById('video-title').innerText = title;
     }
 
-    var videoTitleUrl = `//localhost:3001/videos-title/${params.get('src')}`;
+    const videoSrc = params.get('src');
 
-    var videoUrl = `//localhost:3001/videos/${params.get('src')}`;
+    if (videoSrc) {
+      var videoTitleUrl = `//localhost:3001/videos-title/${videoSrc}`;
 
-    document.getElementById('my-src').src = videoUrl;
-    var player = videojs('my-video');
+      var videoUrl = `//localhost:3001/videos/${videoSrc}`;
 
-    // Set the starting point to 10 minutes (600 seconds)
-    player.ready(function () {
-      document.body.style.display = 'block';
-      if (startTimeSecs) {
-        player.currentTime(startTimeSecs);
-      }
-      // player.currentTime(startTimeSecs);
-      // player.play(); // Ensure playback starts
+      document.getElementById('my-src').src = videoUrl;
+      var player = videojs('my-video');
 
-      getVideoTitle();
+      // Set the starting point to 10 minutes (600 seconds)
+      player.ready(function () {
+        document.body.style.display = 'block';
+        if (startTimeSecs) {
+          player.currentTime(startTimeSecs);
+        }
+        // player.currentTime(startTimeSecs);
+        // player.play(); // Ensure playback starts
 
-    });
+        getVideoTitle();
+
+      });
+    }
   </script>
 
 </body>

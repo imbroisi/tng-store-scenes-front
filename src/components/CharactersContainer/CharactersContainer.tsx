@@ -7,14 +7,17 @@ export default function CharactersContainer({ checkedCharacters, onChange }: any
     <Box>
       <h4>Characters</h4>
       {
-        CHARACTERS.map((character) => (
-          <Option
-            key={character}
-            label={character}
-            checked={!!checkedCharacters[character as any]}
-            onChange={onChange}
-          />
-        ))
+        CHARACTERS.map((character) => {
+          // if (character === 'none') return null;
+          return (
+            <Option
+              key={character}
+              label={character}
+              checked={!!checkedCharacters[character as any]}
+              onChange={onChange}
+            />
+          )
+        })
       }
     </Box>
   );

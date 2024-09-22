@@ -1,13 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Container, Result, ResulteData, Scene } from './ResultSearch.styles';
+import { set } from 'video.js/dist/types/tech/middleware';
 
 export interface ResultSearchProps {
-  scenesFound: string[] | null
+  scenesFound: {
+    name: string,
+    duration: number,
+  }[],
+  onOpenEpisode: (scene: string) => void
 }
 
-export default function ResultSearch({ scenesFound }: ResultSearchProps) {
+export default function ResultSearch({ scenesFound, onOpenEpisode }: ResultSearchProps) {
   const [open, setOpen] = useState(false);
-  const [showTotal, setShowTotal] = useState(true);
+  const [showTotal, setShowTotal] = useState(false);
+  const [showMinTime, setShowMinTime] = useState(false);
+  const [showMaxTime, setShowMaxTime] = useState(false);
+  const [minTime, setMinTime] = useState(1);
+  const [maxTime, setMaxTime] = useState(30);
 
   useEffect(() => {
     if (scenesFound && scenesFound.length > 0) {
@@ -19,24 +28,82 @@ export default function ResultSearch({ scenesFound }: ResultSearchProps) {
       }, 500);
     }
 
-  },[scenesFound]);
+  }, [scenesFound]);
+
 
   return (
     <Container>
+      <div style={{
+        position: 'absolute',
+        display: open ? 'flex' : 'none',
+        alignItems: 'center',
+        justifyContent: 'top',
+        paddingLeft: '16px',
+        left: '4px',
+        top: '4px',
+        height: '38px',
+        fontSize: '14px',
+      }}>
+        <b>Durantion:</b>
+        <input
+          type="checkbox"
+          checked={showMinTime}
+          onChange={() => setShowMinTime(!showMinTime)}
+          style={{ marginLeft: '30px' }}
+
+        />
+        greater then
+        <div style={{ margin: '2px 6px 0 6px', border: '1px solid #aaa' }}>
+          <input
+            style={{ visibility: showMinTime ? 'visible' : 'hidden', width: '50px', border: 0, padding: '4px' }}
+            type="number"
+            value={minTime}
+            disabled={false}
+            onChange={(e) => { setMinTime(Number(e.target.value)) }}
+          />
+        </div>
+        secs
+
+        <input
+          type="checkbox"
+          checked={showMaxTime}
+          onChange={() => setShowMaxTime(!showMaxTime)}
+          style={{ marginLeft: '40px' }}
+        />
+        less then
+        <div style={{ margin: '2px 6px 0 6px', border: '1px solid #aaa' }}>
+          <input
+            style={{ visibility: showMaxTime ? 'visible' : 'hidden', width: '50px', border: 0, padding: '4px' }}
+            type="number"
+            value={maxTime}
+            disabled={false}
+            onChange={(e) => { setMaxTime(Number(e.target.value)) }}
+          />
+        </div>
+        secs
+
+      </div>
       <Result onClick={() => setOpen(!open)}>
-        <div>Click for Results</div>
-        <div style={{ position: 'absolute', right: '20px', visibility: showTotal ? 'visible' : 'hidden'}}>
+        <div style={{ visibility: open ? 'hidden' : 'visible' }}>Click for Results</div>
+        <div style={{ position: 'absolute', right: '20px', visibility: showTotal ? 'visible' : 'hidden' }}>
           Total: {scenesFound?.length || 0}
         </div>
       </Result>
       {open && (
         <ResulteData>
           {
-            scenesFound && scenesFound.map((scene) => (
-              <Scene key={scene}>
-                {scene}
-              </Scene>
-          ))}
+            scenesFound && scenesFound.map((scene) => {
+              const { name, duration } = scene;
+              if (duration < minTime || duration > maxTime) {
+                return null;
+              }
+              const [episode, time] = name.split(' ');
+              return (
+                <Scene key={name} onClick={() => onOpenEpisode(name)}>
+                  <b>{episode}</b> - {time} ({duration}s)
+                </Scene>
+              )
+            })}
         </ResulteData>
       )}
     </Container>

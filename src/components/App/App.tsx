@@ -5,22 +5,27 @@ import CharactersDataContainer from '../CharactersDataContainer';
 import LocaisContainer from '../LocaisContainer';
 import { CHARACTERS_ACTIONS } from '../../config';
 import ResultSearch from '../ResultSearch';
+import Draggable from 'react-draggable';
 // import VideoJS from '../VideoJS';
 // import videojs from 'video.js';
 
 const ACTIONS_KEYS = Object.keys(CHARACTERS_ACTIONS);
 
+const [lastEpisode, lastTime, lastDuration] = (localStorage.getItem('episodeAndTimeAndDuration')?.split(' ')) || ['', '', ''];
+
 export default function App() {
   const [pageModel, setPageModel] = useState('get');
-  const [episode, setEpisode] = useState('');
-  const [time, setTime] = useState('');
+  const [episode, setEpisode] = useState(lastEpisode);
+  const [time, setTime] = useState(lastTime);
+  const [duration, setDuration] = useState(lastDuration);
   const [localSelected, setLocalSelected] = useState('Bridge');
   const [checkedCharacters, setCheckedCharacters] = useState<{ [key: string]: boolean }>({});
   const [optionsSelecteds, setOptionsSelecteds] = useState<{ [key: string]: any }>({});
   const [mode, setMode] = useState('FLEX');
-  const [scenesFound, setScenesFound] = useState<string[] | null>(null);
+  const [scenesFound, setScenesFound] = useState<{ name: string; duration: number; }[]>([]);
   const divIframeRef = useRef<HTMLDivElement | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const [videoData, setVideoData] = useState({ videoSrc: '', videoStartTime: '' });
 
   const formatCharacters = () => {
     const characters: { name: string; actions: string; }[] = [];
@@ -50,7 +55,7 @@ export default function App() {
   }
 
   const handleGet = async () => {
-    setScenesFound(null);
+    setScenesFound([]);
 
     const characters = formatCharacters();
 
@@ -82,10 +87,15 @@ export default function App() {
       return regex.test(time);
     };
 
-    const validateEpisodeTime = (time: string): boolean => {
+    const validateEpisodeTime = (episode: string): boolean => {
       const regex = /^s\d{2}e\d{2}$/;
-      return regex.test(time);
+      return regex.test(episode);
     };
+
+    const validateDuration = (duration: string): boolean => {
+      const regex = /^\d+$/;
+      return regex.test(duration);
+    }
 
     if (!validateEpisodeTime(episode)) {
       alert('INVALID EPISODE FORMAT.\nIt should be in the format for example s05e12.');
@@ -97,6 +107,11 @@ export default function App() {
       return;
     }
 
+    if (!validateDuration(duration)) {
+      alert('INVALID DURATION FORMAT.\nIt should be a number.');
+      return;
+    } 
+
     // eslint-disable-next-line no-restricted-globals
     if (!confirm('Save scene?')) {
       console.log('==> not saved');
@@ -107,9 +122,12 @@ export default function App() {
 
     const scene = {
       name: `${episode} ${time}`,
+      duration: parseInt(duration),
       local: localSelected,
       characters
     }
+
+    localStorage.setItem('episodeAndTimeAndDuration', `${episode} ${time} ${duration}`);
 
     console.log('==> scene', JSON.stringify(scene, null, 2));
 
@@ -174,65 +192,93 @@ export default function App() {
     setTime(newTime);
   }
 
+  const handleDurantioChange = (e: any) => {
+    const newDuration = e.target.value;
+    setDuration(newDuration);
+  }
+
+  const closeVideoScreen = () => {
+    if (divIframeRef.current) {
+      console.log('==> closing iframe');
+      // @ts-ignore
+      iframeRef.current.contentWindow?.pauseVideo();
+      divIframeRef.current.style.display = 'none';
+    }
+  }
+
+  const changePageModel = () => {
+    closeVideoScreen();
+    setPageModel(pageModel === 'get' ? 'save' : 'get')
+  }
+
+  const handleOpenEpisode = (scene: string) => {
+    console.log('==> opening episode', scene);
+    const [src, startTime] = scene.split(' ');
+    if (divIframeRef.current) {
+      divIframeRef.current.style.display = 'flex';
+    }
+
+    setVideoData({
+      videoSrc: src,
+      videoStartTime: startTime
+    });
+  }
+
   const noCharSelected = Object.keys(checkedCharacters).filter(character => checkedCharacters[character]).length === 0;
 
   // TMP
-  const videoSrc = 's05e13';
-  const startTime = '00:22:13';
+  const { videoSrc, videoStartTime } = videoData;
+
+  console.log('==> rendering... videoSrc videoStartTime', videoSrc, videoStartTime);
 
   return (
     <>
-      <div
-        ref={divIframeRef}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-end',
-          border: '2px solid #444',
-          borderRadius: '4px',
-          position: 'fixed',
-          zIndex: 1000,
-          top: '20px',
-          left: '20px',
-          backgroundColor: '#000',
-          padding: '8px',
-          color: '#fff',
-        }}
-      >
-        <div>
-          <iframe
-            ref={iframeRef}
-            src={`/video-player.html?src=${videoSrc}&starttime=${startTime}`}
-            width="960"
-            height="720"
-            style={{ marginBottom: '8px', border: 0 }}
-          />
-        </div>
+      <Draggable>
         <div
+          ref={divIframeRef}
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            width: '100%',
-            padding: '0 8px',
-            boxSizing: 'border-box',
+            display: videoSrc ? 'flex' : 'none',
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            border: '2px solid #444',
+            borderRadius: '4px',
+            position: 'fixed',
+            zIndex: 1000,
+            top: '20px',
+            left: '20px',
+            backgroundColor: '#000',
+            padding: '8px',
+            color: '#fff',
           }}
         >
-          <div id="video-title" />
+          <div>
+            <iframe
+              ref={iframeRef}
+              src={`/video-player.html?src=${videoSrc}&starttime=${videoStartTime}`}
+              width="960"
+              height="720"
+              style={{ marginBottom: '8px', border: 0 }}
+            />
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              width: '100%',
+              padding: '0 8px',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div id="video-title" />
 
-          <div style={{ fontSize: '14px' }}>start &#8594; {startTime}</div>
+            <div style={{ fontSize: '14px' }}>start &#8594; {videoStartTime}</div>
 
-          <button onClick={() => {
-            if (divIframeRef.current) {
-              console.log('==> closing iframe');
-              // @ts-ignore
-              iframeRef.current.contentWindow?.pauseVideo();
-              divIframeRef.current.style.display = 'none';
-            }
-          }}>
-            Close
-          </button>
+            <button onClick={closeVideoScreen}>
+              Close
+            </button>
+          </div>
         </div>
-      </div>
+      </Draggable>
 
       <h1 style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', borderBottom: '1px solid #ddd', padding: '0px', margin: 0, height: '60px' }}>
         <div style={{
@@ -246,13 +292,11 @@ export default function App() {
           {pageModel === 'get' ? 'Get Scenes' : 'Save Scenes'}
         </div>
         <div style={{ position: 'absolute', right: '24px', fontSize: '14px', cursor: 'pointer', color: 'blue' }}>
-          <div onClick={() => setPageModel(pageModel === 'get' ? 'save' : 'get')}>
+          <div onClick={changePageModel}>
             {pageModel === 'get' ? 'save scenes >' : 'get scenes >'}
           </div>
         </div>
       </h1>
-
-      {/* <VideoJS options={videoJsOptions} onReady={handlePlayerReady} /> */}
 
       <Container>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -292,6 +336,12 @@ export default function App() {
                   </label>
                   <input type="text" value={time} style={{ width: '97%' }} onChange={handleTimeChange} />
                 </div>
+                <div style={{ marginTop: '8px' }}>
+                  <label>
+                    Duration (secs):
+                  </label>
+                  <input type="text" value={duration} style={{ width: '97%' }} onChange={handleDurantioChange} />
+                </div>
                 <div>
                   <button style={{ marginTop: '16px' }} onClick={handleSave}>
                     Save
@@ -308,7 +358,8 @@ export default function App() {
         <CharactersDataContainer optionsSelecteds={optionsSelecteds} checkedCharacters={checkedCharacters} onChange={handleOptionChanged} />
       </Container>
 
-      <ResultSearch scenesFound={scenesFound} />
+      
+      {pageModel === 'get' && <ResultSearch scenesFound={scenesFound || []} onOpenEpisode={handleOpenEpisode} />}
     </>
   );
 }

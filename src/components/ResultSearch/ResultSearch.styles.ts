@@ -8,7 +8,7 @@ export const Container = styled.div`
   justify-content: top;
   align-items: center;
   flex-direction: column;
-  min-width: 700px;
+  min-width: 800px;
   width: fit-content;
   background-color: #eee;
 `;
@@ -42,7 +42,7 @@ export const ResulteData = styled.div`
   overflow-y: auto;
 `;
 
-export const Scene = styled.div`
+export const Scene = styled.button`
   font-size: 14px;
   break-inside: avoid; /* Prevents breaking inside the Scene element */
 

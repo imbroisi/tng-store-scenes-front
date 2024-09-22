@@ -21,8 +21,7 @@ export default function CharactersDataContainer({ optionsSelecteds, checkedChara
           if (!checkedCharacters[character]) {
             return;
           }
-          // console.log('>>>>>> character', character);
-          // console.log('>>>>>> optionsSelecteds', optionsSelecteds);
+
           return (
             <Box key={character}>
               <h3 style={{ textAlign: 'center' }}>{character}</h3>

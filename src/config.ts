@@ -1,6 +1,7 @@
 export const LOCAIS = [
   'Bridge',
   'ScreenBridge',
+  'HelmBridge',
   'BackPanelBridge',
   'ReadyRoom',
   'ConferenceRoom',
@@ -23,11 +24,16 @@ export const LOCAIS = [
   'InsideBorgShip',
   'InsideRomulanShip',
   'InsideFederationShip',
-  'Space',
+  
+  'SpaceDeep',
+  'SpaceStation',
+  'SpaceOrbitPlanet',
+  'SpaceOrbitStar',
   'PlanetSurface',
 ];
 
 export const CHARACTERS = [
+  'none',
   'Picard',
   'Data',
   'Ricker',
@@ -52,9 +58,6 @@ export const CHARACTERS = [
   'RomulanShip',  
   'FederationShip',
 
-  'PlanetGround',
-  'PlanetOrbit',
-  'SpaceStation',
 ];
 
 export const CHARACTERS_ACTIONS = {
@@ -72,7 +75,8 @@ export const CHARACTERS_ACTIONS = {
   ],
   MOVEMENT: [
     'ignore',
-    'stopped',
+    'seated',
+    'standingStill',
     'normal',
     'slow',
     'fast',
