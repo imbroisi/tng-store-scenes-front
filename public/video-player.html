@@ -56,7 +56,6 @@
 
 
   <script>
-    console.log('++++>>> video-player.html');
     function pauseVideo() {
       console.log('pauseVideo');
       const video = videojs('my-video');
@@ -99,7 +98,7 @@
           player.currentTime(startTimeSecs);
         }
         // player.currentTime(startTimeSecs);
-        // player.play(); // Ensure playback starts
+        player.play(); // Ensure playback starts
 
         getVideoTitle();
 
