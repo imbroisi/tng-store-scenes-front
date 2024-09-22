@@ -1,13 +1,12 @@
 import { useRef, useState } from 'react';
+import Draggable from 'react-draggable';
 import CharactersContainer from '../CharactersContainer';
+
 import { Container } from './App.styles';
 import CharactersDataContainer from '../CharactersDataContainer';
 import LocaisContainer from '../LocaisContainer';
 import { CHARACTERS_ACTIONS } from '../../config';
 import ResultSearch from '../ResultSearch';
-import Draggable from 'react-draggable';
-// import VideoJS from '../VideoJS';
-// import videojs from 'video.js';
 
 const ACTIONS_KEYS = Object.keys(CHARACTERS_ACTIONS);
 
@@ -26,6 +25,7 @@ export default function App() {
   const divIframeRef = useRef<HTMLDivElement | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [videoData, setVideoData] = useState({ videoSrc: '', videoStartTime: '' });
+  const [closeResult, setCloseResult] = useState(false);
 
   const formatCharacters = () => {
     const characters: { name: string; actions: string; }[] = [];
@@ -206,6 +206,39 @@ export default function App() {
     }
   }
 
+  const deleteVideo = async () => {
+    // eslint-disable-next-line no-restricted-globals
+    if (!confirm('Delete scene?')) {
+      return;
+    }
+    
+    const videoName = `${videoSrc} ${videoStartTime}`;
+
+    console.log('==> deleting scene', videoName);
+      
+    const response = await fetch('http://localhost:3001/delete-scene', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name: videoName }),
+    });
+
+    console.log('==> response', response);
+
+    const body = await response.text();
+
+    if (response.status !== 200) {
+      alert('ERROR: ' + body);
+    } else {
+      alert('Scene ' + videoName + ' deleted');
+    } 
+
+    setScenesFound([])
+    
+    closeVideoScreen();
+  }
+
   const changePageModel = () => {
     closeVideoScreen();
     setPageModel(pageModel === 'get' ? 'save' : 'get')
@@ -224,6 +257,13 @@ export default function App() {
     });
   }
 
+  const clearSelections = () => {
+    setCheckedCharacters({});
+    setOptionsSelecteds({});
+    setLocalSelected('Bridge');
+    setDuration('');
+  }
+
   const noCharSelected = Object.keys(checkedCharacters).filter(character => checkedCharacters[character]).length === 0;
 
   // TMP
@@ -232,7 +272,7 @@ export default function App() {
   console.log('==> rendering... videoSrc videoStartTime', videoSrc, videoStartTime);
 
   return (
-    <>
+    <div onClick={() => setCloseResult(true)}>
       <Draggable>
         <div
           ref={divIframeRef}
@@ -273,6 +313,9 @@ export default function App() {
 
             <div style={{ fontSize: '14px' }}>start &#8594; {videoStartTime}</div>
 
+            <button onClick={deleteVideo}>
+              Delete
+            </button>
             <button onClick={closeVideoScreen}>
               Close
             </button>
@@ -299,6 +342,7 @@ export default function App() {
       </h1>
 
       <Container>
+
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div style={{ border: '1px solid #aaa', padding: '16px', margin: '16px' }}>
             {pageModel === 'get' ? (
@@ -350,16 +394,23 @@ export default function App() {
               </>
             )}
           </div>
+          <div style={{ width: '100%',marginLeft: '32px' }}>
+            <button onClick={clearSelections}>
+              Clear Selections
+            </button>
+          </div>
           <div style={{ display: 'flex' }}>
             <LocaisContainer localSelected={localSelected} onChange={handleLocalChanged} />
-            <CharactersContainer checkedCharacters={checkedCharacters} onChange={handleCharacterChanged} />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+              <CharactersContainer checkedCharacters={checkedCharacters} onChange={handleCharacterChanged} />
+            </div>
           </div>
         </div>
         <CharactersDataContainer optionsSelecteds={optionsSelecteds} checkedCharacters={checkedCharacters} onChange={handleOptionChanged} />
       </Container>
 
       
-      {pageModel === 'get' && <ResultSearch scenesFound={scenesFound || []} onOpenEpisode={handleOpenEpisode} />}
-    </>
+      {pageModel === 'get' && <ResultSearch close={closeResult} scenesFound={scenesFound || []} onOpenEpisode={handleOpenEpisode} onClose={() => setCloseResult(false)} />}
+    </div>
   );
 }

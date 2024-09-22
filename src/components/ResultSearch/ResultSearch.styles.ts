@@ -42,9 +42,9 @@ export const ResulteData = styled.div`
   overflow-y: auto;
 `;
 
-export const Scene = styled.button`
+export const Scene = styled.div`
   font-size: 14px;
   break-inside: avoid; /* Prevents breaking inside the Scene element */
-
+  cursor: pointer;
   margin-bottom: 4px; /* Adjust the margin as needed */
 `;

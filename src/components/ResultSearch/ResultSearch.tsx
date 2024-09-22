@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Container, Result, ResulteData, Scene } from './ResultSearch.styles';
 import { set } from 'video.js/dist/types/tech/middleware';
+import { on } from 'events';
 
 export interface ResultSearchProps {
   scenesFound: {
@@ -8,15 +9,23 @@ export interface ResultSearchProps {
     duration: number,
   }[],
   onOpenEpisode: (scene: string) => void
+  close: boolean
+  onClose: () => void
 }
 
-export default function ResultSearch({ scenesFound, onOpenEpisode }: ResultSearchProps) {
-  const [open, setOpen] = useState(false);
+export default function ResultSearch({ scenesFound, onOpenEpisode, close, onClose }: ResultSearchProps) {
+  const [open, setOpen] = useState(!close);
   const [showTotal, setShowTotal] = useState(false);
   const [showMinTime, setShowMinTime] = useState(false);
   const [showMaxTime, setShowMaxTime] = useState(false);
   const [minTime, setMinTime] = useState(1);
   const [maxTime, setMaxTime] = useState(30);
+
+  useEffect(() => {
+    if (open) {
+      onClose();
+    }
+  }, [open]);
 
   useEffect(() => {
     if (scenesFound && scenesFound.length > 0) {
@@ -29,6 +38,12 @@ export default function ResultSearch({ scenesFound, onOpenEpisode }: ResultSearc
     }
 
   }, [scenesFound]);
+
+  useEffect(() => {
+    if (close) {
+      setOpen(false);
+    }
+  }, [close]);
 
 
   return (
