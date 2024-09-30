@@ -66,6 +66,10 @@ export default function App() {
 
       console.log('6) ==> thisCharacterOptions', JSON.stringify(thisCharacterOptions, null, 2));
 
+      if (!thisCharacterOptions) {
+        alert('Please select the actions for the characters');
+        return;
+      }
 
       const thisCharacterOptionsKeys = Object.keys(thisCharacterOptions);
       const thisCharacterOptionsValues = Object.values(thisCharacterOptions);
