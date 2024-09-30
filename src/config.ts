@@ -49,6 +49,8 @@ export const CHARACTERS = [
   'Klingon',
   'Borg',
   'Romulan',
+  
+  'Crowd',
 
   'EnterpriseFront',
   'EnterpriseBack',
@@ -62,6 +64,38 @@ export const CHARACTERS = [
 ];
 
 export const CHARACTERS_ACTIONS = {
+  light: [
+    'dark',
+    'bright',
+    'flashing',
+    'emergency'
+  ],
+  camera: [
+    'closeUp',
+    'far',
+    'side',
+    'top',
+    'bottom',
+    'back',
+    'front',
+    'shaking'
+  ],
+  'looking-at': [
+    'bridgeScreen',
+    'bridgeSecurityPanel',
+    'bridgeBackPanel',
+    'bridgeHelm',
+    'bridgeCaptainChair',
+    'monitor',
+    'window',
+    'Picard',
+    'Data',
+    'Ricker',
+    'Geordi',
+    'Worf',
+    'Troi',
+    'DraCrusher'
+  ],
   'talking/sound': [
     'silence',
     'talking',
@@ -71,6 +105,8 @@ export const CHARACTERS_ACTIONS = {
     'laughing',
     'surprised',
     'singing',
+    'playingInstrument',
+    'trainnig',
   ],
   movement: [
     'seated',
@@ -80,10 +116,10 @@ export const CHARACTERS_ACTIONS = {
     'running',
     'dancing',
     'shaking',
+    'flying',
     'warp',
   ],
   fighting: [
-    'no',
     'fists',
     'phasers',
     'photonTorpedos',
@@ -92,28 +128,3 @@ export const CHARACTERS_ACTIONS = {
     'bat\'leth'
   ],
 };
-
-/*
-  Por exemplo Bridge.js
-  {
-    's04e12 00:01:00': {
-      Picard: {
-        TALKING/SOUND: ['normal', 'quietly', 'loudly']
-        FIGHTING: ['fists', 'phasers', 'photonTorpedos']
-      },
-      Data: {
-        TALKING/SOUND: ['normal', 'quietly']
-        MOVEMENT: ['normal', 'fast', 'slow']
-      }
-    },
-    ...  
-}  
-
-
-*/
-
-/*
-  pesquisa por nome do personagem:
-    * -> qualquer um
- 
-*/
