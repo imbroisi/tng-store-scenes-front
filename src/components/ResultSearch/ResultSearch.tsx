@@ -4,10 +4,7 @@ import { set } from 'video.js/dist/types/tech/middleware';
 import { on } from 'events';
 
 export interface ResultSearchProps {
-  scenesFound: {
-    name: string,
-    duration: number,
-  }[],
+  scenesFound: string[],
   onOpenEpisode: (scene: string) => void
   close: boolean
   onClose: () => void
@@ -44,6 +41,8 @@ export default function ResultSearch({ scenesFound, onOpenEpisode, close, onClos
       setOpen(false);
     }
   }, [close]);
+
+  console.log('scenesFound', scenesFound);
 
 
   return (
@@ -98,21 +97,27 @@ export default function ResultSearch({ scenesFound, onOpenEpisode, close, onClos
         secs
 
       </div>
-      <Result onClick={() => setOpen(!open)}>
+      <Result>
         <div style={{ visibility: open ? 'hidden' : 'visible' }}>Click for Results</div>
-        <div style={{ position: 'absolute', right: '20px', visibility: showTotal ? 'visible' : 'hidden' }}>
-          Total: {scenesFound?.length || 0}
+        <div style={{ position: 'absolute', right: '20px', visibility: showTotal ? 'visible' : 'hidden', display: 'flex' }}>
+          <button onClick={() => {console.log('AQIWQOIHWOQIHWOQ'); setOpen(!open)}} style={{ marginRight: '20px' }}>{ open? 'Close' : 'Open'}</button>
+          <div>Total: {scenesFound?.length || 0}</div>
         </div>
       </Result>
       {open && (
         <ResulteData>
           {
             scenesFound && scenesFound.map((scene) => {
-              const { name, duration } = scene;
-              if (duration < minTime || duration > maxTime) {
-                return null;
-              }
-              const [episode, time] = name.split(' ');
+              const [episode, time, duration ] = scene.split(' ');
+              const name = `${episode} ${time}`;
+                if (showMinTime && parseInt(duration) < minTime) {
+                  return null;
+                }
+                if (showMaxTime && parseInt(duration) > maxTime) {
+                  return null;
+                }
+              // const [episode, time] = name.split(' ');
+              console.log('==================================', minTime, maxTime);
               return (
                 <Scene key={name} onClick={() => onOpenEpisode(name)}>
                   <b>{episode}</b> - {time} ({duration}s)

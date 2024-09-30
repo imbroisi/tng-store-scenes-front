@@ -19,45 +19,161 @@ export default function App() {
   const [duration, setDuration] = useState(lastDuration);
   const [localSelected, setLocalSelected] = useState('Bridge');
   const [checkedCharacters, setCheckedCharacters] = useState<{ [key: string]: boolean }>({});
-  const [optionsSelecteds, setOptionsSelecteds] = useState<{ [key: string]: any }>({});
+  const [optionsSelecteds, setOptionsSelecteds] = useState<any>({});
   const [mode, setMode] = useState('FLEX');
-  const [scenesFound, setScenesFound] = useState<{ name: string; duration: number; }[]>([]);
+  const [scenesFound, setScenesFound] = useState<string[]>([]);
   const divIframeRef = useRef<HTMLDivElement | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [videoData, setVideoData] = useState({ videoSrc: '', videoStartTime: '' });
   const [closeResult, setCloseResult] = useState(false);
 
   const formatCharacters = () => {
-    const characters: { name: string; actions: string; }[] = [];
+    // const charactersResponse: { name: string; actions: any; }[] = [];
 
-    Object.keys(checkedCharacters).forEach(character => {
-      if (!checkedCharacters[character]) {
+    console.log('1) ==> checkedCharacters', JSON.stringify(checkedCharacters, null, 2));
+
+    const charactersNames: string[] = [];
+
+    Object.keys(checkedCharacters).forEach(characterSelected => {
+      if (!checkedCharacters[characterSelected]) {
         return;
       }
 
-      const actionsFormated: { [key: string]: string } = {};
-      ACTIONS_KEYS.forEach(action => {
-        if (optionsSelecteds[character][action] === 'ignore') {
-          return;
-        }
+      charactersNames.push(characterSelected);
 
-        actionsFormated[action] = optionsSelecteds[character][action];
-      });
-      const actionsString = JSON.stringify(actionsFormated);
-
-      characters.push({
-        name: character,
-        actions: actionsString
-      });
     });
 
-    return characters;
+    console.log('3) ==> charactersNames', charactersNames);
+
+    if (charactersNames.length === 0) {
+      return [];
+    }
+
+    console.log('4) ==> charactersNames', charactersNames);
+
+    // DOC: aqui charactersNames => ['Picard', 'Data']
+
+    const charactersFormated: { [key: string]: any } = {};
+
+    charactersNames.forEach(thisCharacterName => {
+      
+      // DOC: aqui charactersNames => 'Picard'
+      console.log('5) ==> thisCharacterName', thisCharacterName);
+      
+      charactersFormated[thisCharacterName] = {};
+      
+      let thisCharacterOptions = optionsSelecteds[thisCharacterName];
+
+      console.log('6) ==> thisCharacterOptions', JSON.stringify(thisCharacterOptions, null, 2));
+
+
+      const thisCharacterOptionsKeys = Object.keys(thisCharacterOptions);
+      const thisCharacterOptionsValues = Object.values(thisCharacterOptions);
+
+
+      console.log('7) ==> thisCharacterOptionsKeys', JSON.stringify(thisCharacterOptionsKeys, null, 2));
+      console.log('8) ==> thisCharacterOptionsValues', JSON.stringify(thisCharacterOptionsValues, null, 2));
+
+      thisCharacterOptionsValues.forEach((value: any, index) => {
+        console.log('9) ==> value', JSON.stringify(value, null, 2));
+        const thisCharacterOptionsValuesArray =  Object.keys(value).filter((thisActionValue: any) => value[thisActionValue]);
+        console.log('10) ==> thisCharacterOptionsValuesArray', JSON.stringify(thisCharacterOptionsValuesArray, null, 2));
+        charactersFormated[thisCharacterName][thisCharacterOptionsKeys[index]] = thisCharacterOptionsValuesArray
+      }); 
+
+      console.log('11) ==> charactersFormated', JSON.stringify(charactersFormated, null, 2));
+
+
+    });
+
+    return charactersFormated;
   }
+
+  
+      // const thisCharacterObject = {
+      //   name: thisCharacterName,
+      //   actions: []
+      // }
+
+// 
+
+    //   const thisCharacterOptionsKeys = Object.keys(thisCharacterOptions)
+    //   const thisCharacterOptionsValues = Object.values(thisCharacterOptions)
+
+    //   console.log('6.1) ==> thisCharacterOptionsKeys', thisCharacterOptionsKeys);
+    //   console.log('6.2) ==> thisCharacterOptionsValues', JSON.stringify(thisCharacterOptionsValues, null, 2));
+    //   // const thisActionValuesArray = Object.keys(thisActionValues).filter(thisActionValue => thisActionValues[thisActionValue]);
+
+
+
+    //   const thisCharacterObjectActions = Object.keys(thisCharacterOptions).map(thisActionName => {
+    //     console.log('7) ==> thisActionName', thisActionName);
+    //     // DOC: aqui thisActionName => 'movement'
+
+    //     const thisActionValues = thisCharacterOptions[thisActionName];
+
+    //     console.log('8) ==> thisActionValues', thisActionValues);
+
+    //     const thisActionValuesArray = Object.keys(thisActionValues).filter(thisActionValue => thisActionValues[thisActionValue]);
+
+    //     console.log('9) ==> thisActionValuesArray', thisActionValuesArray);
+
+    //     const thisActionObject = {
+    //       name: thisActionName,
+    //       values: thisActionValuesArray
+    //     }
+
+    //     console.log('10) ==> thisActionObject', thisActionObject);
+
+    //     return thisActionObject;
+    //   });
+
+    //   console.log('11) ==> thisCharacterObjectActions', thisCharacterObjectActions);
+
+    //   /* 
+    //     aqui 
+    //     thisCharacterObjectActions = 
+    //     [
+    //       {
+    //         name: 'movement',
+    //         values: ['walk', 'running]
+    //       },
+    //       {
+    //         name: 'talking',
+    //         values: ['talking', 'singing']
+    //       }
+    //     ]
+      
+    //   */
+    //   return {
+    //     ...thisCharacterObject,
+    //     actions: thisCharacterObjectActions
+    //   }
+
+
+  //   });
+
+  //   // console.log('12) ==> charactersFormated', JSON.stringify(charactersFormated, null, 2));
+
+
+  //   // // DOC: aqui charactersNames => ['Picard']
+
+
+
+
+
+
+
+  //   return charactersFormated;
+  // }
 
   const handleGet = async () => {
     setScenesFound([]);
 
     const characters = formatCharacters();
+
+    console.log('==> characters', characters);
+
 
     const search = {
       mode,
@@ -73,7 +189,10 @@ export default function App() {
       body: JSON.stringify(search)
     });
 
-    const { scenes } = await response.json();
+    console.log('==> response', response);
+
+
+    const { scenes, error } = await response.json();
 
     setScenesFound(scenes);
 
@@ -110,7 +229,7 @@ export default function App() {
     if (!validateDuration(duration)) {
       alert('INVALID DURATION FORMAT.\nIt should be a number.');
       return;
-    } 
+    }
 
     // eslint-disable-next-line no-restricted-globals
     if (!confirm('Save scene?')) {
@@ -121,9 +240,9 @@ export default function App() {
     const characters = formatCharacters();
 
     const scene = {
-      name: `${episode} ${time}`,
+      sceneName: `${episode} ${time}`,
       duration: parseInt(duration),
-      local: localSelected,
+      local: localSelected, // localSelected será o nome do arquivo .json
       characters
     }
 
@@ -140,11 +259,15 @@ export default function App() {
     });
 
     console.log('==> response', response);
-    if (response.status !== 200) {
-      const body = await response.json();
-      console.log('==> body', body);
-      alert('Error saving scene: ' + body.error);
+
+    if (response.status === 200) {
+      alert('Scene saved');
+      return;
     }
+
+    const body = await response.json();
+    console.log('==> body', body);
+    alert('Error saving scene: ' + body.error);
   }
 
   const handleLocalChanged = (local: string) => {
@@ -162,25 +285,46 @@ export default function App() {
     character: string,
     optionName: string,
     optionChanged: string,
+    isChecked: boolean
   ) => {
-    let newOptionsSelecteds: { [action: string]: string; };
 
-    if (optionName === 'ALL') {
-      newOptionsSelecteds = {};
-      ACTIONS_KEYS.forEach(action => {
-        newOptionsSelecteds[action] = optionChanged;
-      });
-    } else {
-      newOptionsSelecteds = { [optionName]: optionChanged };
-    }
+    // console.log('==> character', character);
+    // console.log('==> optionName', optionName);
+    // console.log('==> optionChanged', optionChanged);
+    // console.log('==> isChecked', isChecked);
 
-    setOptionsSelecteds({
+    // let newOptionsSelecteds: { [action: string]: string; };
+
+
+    // newOptionsSelecteds = { [optionName]: optionChanged };
+
+    // console.log('==> newOptionsSelecteds', newOptionsSelecteds);
+    // console.log('==> optionsSelecteds', optionsSelecteds);
+
+    const newValue = {
       ...optionsSelecteds,
       [character]: {
         ...optionsSelecteds[character],
-        ...newOptionsSelecteds
+        [optionName]: {
+          ...optionsSelecteds[character]?.[optionName],
+          [optionChanged]: isChecked
+        }
       }
-    });
+    };
+
+    // console.log('==> newValue', newValue);
+
+
+    setOptionsSelecteds(newValue);
+
+
+    // setOptionsSelecteds({
+    //   ...optionsSelecteds,
+    //   [character]: {
+    //     ...optionsSelecteds[character],
+    //     ...newOptionsSelecteds
+    //   }
+    // });
   };
 
   const handleEpisodeChange = (e: any) => {
@@ -211,17 +355,17 @@ export default function App() {
     if (!confirm('Delete scene?')) {
       return;
     }
-    
-    const videoName = `${videoSrc} ${videoStartTime}`;
 
-    console.log('==> deleting scene', videoName);
-      
+    const sceneName = `${videoSrc} ${videoStartTime}`;
+
+    console.log('==> deleting scene', sceneName);
+
     const response = await fetch('http://localhost:3001/delete-scene', {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ name: videoName }),
+      body: JSON.stringify({ sceneName }),
     });
 
     console.log('==> response', response);
@@ -231,11 +375,11 @@ export default function App() {
     if (response.status !== 200) {
       alert('ERROR: ' + body);
     } else {
-      alert('Scene ' + videoName + ' deleted');
-    } 
+      alert('Scene ' + sceneName + ' deleted');
+    }
 
     setScenesFound([])
-    
+
     closeVideoScreen();
   }
 
@@ -269,10 +413,10 @@ export default function App() {
   // TMP
   const { videoSrc, videoStartTime } = videoData;
 
-  console.log('==> rendering... videoSrc videoStartTime', videoSrc, videoStartTime);
+  // console.log('==> rendering... videoSrc videoStartTime', videoSrc, videoStartTime);
 
   return (
-    <div onClick={() => setCloseResult(true)}>
+    <div>
       <Draggable>
         <div
           ref={divIframeRef}
@@ -394,14 +538,14 @@ export default function App() {
               </>
             )}
           </div>
-          <div style={{ width: '100%',marginLeft: '32px' }}>
+          <div style={{ width: '100%', marginLeft: '32px' }}>
             <button onClick={clearSelections}>
               Clear Selections
             </button>
           </div>
           <div style={{ display: 'flex' }}>
             <LocaisContainer localSelected={localSelected} onChange={handleLocalChanged} />
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <CharactersContainer checkedCharacters={checkedCharacters} onChange={handleCharacterChanged} />
             </div>
           </div>
@@ -409,7 +553,7 @@ export default function App() {
         <CharactersDataContainer optionsSelecteds={optionsSelecteds} checkedCharacters={checkedCharacters} onChange={handleOptionChanged} />
       </Container>
 
-      
+
       {pageModel === 'get' && <ResultSearch close={closeResult} scenesFound={scenesFound || []} onOpenEpisode={handleOpenEpisode} onClose={() => setCloseResult(false)} />}
     </div>
   );

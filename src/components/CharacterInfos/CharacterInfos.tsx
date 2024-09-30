@@ -12,13 +12,13 @@ export interface CharacterInfosProps {
 
 export default function CharacterInfos({ character, optionsSelecteds, onChange }: CharacterInfosProps) {
 
-  // console.log('>>>>>>> optionsSelecteds', JSON.stringify(optionsSelecteds));
+  // console.log('>>>>>>> optionsSelecteds', optionsSelecteds);
 
-  useEffect(() => {
-    if (!optionsSelecteds[character]) {
-      onChange('ALL', 'ignore', true);
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (!optionsSelecteds[character]) {
+  //     onChange('ALL', 'ignore', true);
+  //   }
+  // }, []);
 
   return (
     <Container>
@@ -33,12 +33,12 @@ export default function CharacterInfos({ character, optionsSelecteds, onChange }
               </div>
               {                 
                 (CHARACTERS_ACTIONS as any)[action].map((characterAction: string) => {
-                  const checked = optionsSelecteds[character]?.[action] === characterAction;
+                  const checked = !!optionsSelecteds[character]?.[action]?.[characterAction] ;
 
                   return (
                     <Option
                       key={characterAction}
-                      isRadio
+                      // isRadio
                       name={name}
                       label={characterAction}
                       checked={checked}

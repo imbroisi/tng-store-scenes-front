@@ -22,7 +22,7 @@ export const Result = styled.div`
   border: 2px solid #aaa;
   box-sizing: border-box;
 
-  cursor: pointer;
+  /* cursor: pointer; */
 `;
 
 export const ResulteData = styled.div`

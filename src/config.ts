@@ -62,7 +62,7 @@ export const CHARACTERS = [
 ];
 
 export const CHARACTERS_ACTIONS = {
-  'TALKING/SOUND': [
+  'talking/sound': [
     'silence',
     'talking',
     'warning',
@@ -72,7 +72,7 @@ export const CHARACTERS_ACTIONS = {
     'surprised',
     'singing',
   ],
-  MOVEMENT: [
+  movement: [
     'seated',
     'lying',
     'standing',
@@ -82,7 +82,7 @@ export const CHARACTERS_ACTIONS = {
     'shaking',
     'warp',
   ],
-  FIGHTING: [
+  fighting: [
     'no',
     'fists',
     'phasers',

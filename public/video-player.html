@@ -64,7 +64,7 @@
 
     var params = new URLSearchParams(document.location.search);
     var startTime = params.get('starttime') || '';
-    console.log('starttime', startTime);
+    // console.log('starttime', startTime);
     const [hours, minutes, seconds] = startTime.split(':');
 
     startTimeSecs = parseInt(startTime) * 60 * 60 + parseInt(minutes) * 60 + parseInt(seconds);
